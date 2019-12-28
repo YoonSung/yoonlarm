@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yoonlarm/bloc/alarm_event.dart';
+import 'package:yoonlarm/bloc/alarm_state.dart';
 import 'package:yoonlarm/pages/preset_page.dart';
-import 'package:yoonlarm/model/alarm.dart';
-import 'package:yoonlarm/model/alarm_repository.dart';
 import 'package:yoonlarm/pages/alarm_registration.dart';
 import 'package:yoonlarm/pages/current_alarm.dart';
+import 'package:yoonlarm/bloc/alarm_bloc.dart';
 
-void main() => runApp(Yoonlarm());
+void main() => runApp(BlocProvider(
+ builder: (context) => AlarmBloc()..add(LoadAlarm()),
+ child: Yoonlarm()
+));
 
 class Yoonlarm extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'No more No forget Alarm',
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
-      ),
-      home: HomePage()
+        title: 'No more No forget Alarm',
+        theme: ThemeData(
+          primarySwatch: Colors.indigo,
+        ),
+        home: HomePage()
     );
   }
 }
@@ -86,67 +91,18 @@ class _HomePageState extends State<HomePage> {
 class AlarmListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Alarm>>(
-      builder: (context, projectSnap) {
-        if (projectSnap.connectionState == ConnectionState.none &&
-            !projectSnap.hasData) {
-          print(projectSnap.data);
-          return Container();
-        }
+    return BlocBuilder<AlarmBloc, AlarmState>(builder: (context, state) {
+      if (state is AlarmLoaded) {
         return ListView.builder(
-            itemCount: projectSnap.data == null ? 0 : projectSnap.data.length,
-            itemBuilder: (context, index) => _buildItem(context, projectSnap.data[index])
-        );
-      },
-      future: AlarmRepository.instance.queryAllRows(),
-    );
-  }
-
-  Widget _buildItem(BuildContext context, Alarm alarm) {
-    return ListTile(
-      title: Text(alarm.title),
-    );
+            itemCount: state.alarms.length,
+            itemBuilder: (BuildContext context, int index) {
+              return ListTile(
+                title: Text(state.alarms[index].title),
+              );
+            });
+      } else {
+        return Container();
+      }
+    });
   }
 }
-/*
-class AlarmListPage extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _AlarmListState(getAllAlarms());
-
-  Future<List<Alarm>> getAllAlarms() {
-    return AlarmRepository.instance.queryAllRows();
-  }
-}
-
-class _AlarmListState extends State<AlarmListPage> {
-
-  Future<List<Alarm>> alarms;
-
-  _AlarmListState(this.alarms);
-
-  Widget _buildItem(BuildContext context, Alarm alarm) {
-    return ListTile(
-      title: Text(alarm.title),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<Alarm>>(
-      builder: (context, projectSnap) {
-        if (projectSnap.connectionState == ConnectionState.none &&
-            !projectSnap.hasData) {
-          print(projectSnap.data);
-          return Container();
-        }
-        return ListView.builder(
-          itemCount: projectSnap.data == null ? 0 : projectSnap.data.length,
-          itemBuilder: (context, index) => _buildItem(context, projectSnap.data[index])
-        );
-      },
-      future: alarms,
-    );
-  }
-
-}
-*/

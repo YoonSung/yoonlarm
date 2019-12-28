@@ -64,7 +64,7 @@ class AlarmRepository {
     row[columnSeconds] = alarm.alarmSeconds;
     row[columnCreatedTimeStamp] = new DateTime.now().millisecondsSinceEpoch ~/ 1000;
     Database db = await instance.database;
-    return await db.insert(table, row);
+    return db.insert(table, row);
   }
 
   // All of the rows are returned as a list of maps, where each map is

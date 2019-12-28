@@ -26,6 +26,8 @@ dependencies:
   numberpicker: ^1.1.0
   sqflite: ^1.1.7+1
   path_provider: 1.4.0
+  bloc: ^2.0.0
+  flutter_bloc: ^2.0.0
 
 dev_dependencies:
   flutter_test:

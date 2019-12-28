@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yoonlarm/bloc/alarm_bloc.dart';
+import 'package:yoonlarm/bloc/alarm_event.dart';
+import 'package:yoonlarm/bloc/alarm_state.dart';
 import 'package:yoonlarm/pages/current_alarm.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:yoonlarm/model/alarm_repository.dart';
@@ -25,6 +29,10 @@ class AlarmStateWidget extends State<AlarmRegistrationWidget> {
 
   @override
   Widget build(BuildContext context) {
+    return _build(context);
+  }
+
+  Widget _build(BuildContext context) {
     controller.value = TextEditingValue(text: alarm.title);
     return Container(
       child: ListView(children: <Widget>[
@@ -95,6 +103,7 @@ class AlarmStateWidget extends State<AlarmRegistrationWidget> {
               child: Text("SAVE"),
               onPressed: () {
                 controller.clear();
+                BlocProvider.of<AlarmBloc>(context).add(AddAlarm(entity: Alarm.createNew(alarm.title, alarm.alarmSeconds)));
                 Navigator.of(context).pop(alarm);
               },
             )
@@ -105,16 +114,17 @@ class AlarmStateWidget extends State<AlarmRegistrationWidget> {
 }
 
 void showRegisterForm(CurrentAlarm alarm, BuildContext context) async {
-  final newAlarm = await showModalBottomSheet<CurrentAlarm>(
+  showModalBottomSheet<CurrentAlarm>(
       context: context,
       useRootNavigator: true,
       builder: (context) {
-        return AlarmRegistrationWidget(
-            creation: true,
-            alarm: alarm
-        );
+        return Builder(builder: (context) => BlocBuilder<AlarmBloc, AlarmState>(
+            builder: (context, state) {
+              return AlarmRegistrationWidget(
+                  creation: true,
+                  alarm: alarm
+              );
+            }
+        ));
       });
-  if (newAlarm != null) {
-    AlarmRepository.instance.insert(Alarm.createNew(newAlarm.title, newAlarm.alarmSeconds));
-  }
 }
